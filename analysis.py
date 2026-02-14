@@ -1,4 +1,5 @@
 import sys
+from pathlib import Path
 from typing import Final, cast
 
 import matplotlib.pyplot as plt
@@ -13,7 +14,7 @@ DPI: Final = 400
 
 
 def process_location(df: pd.DataFrame, location: str, target_year: int, prev_year: int) -> None:
-    logger.info("Processing %s...", location)
+    logger.info("Processing {}...", location)
     for column, name in {
         "max_temp": "Maximum Temperature",
         "max_humidity": "Maximum Humidity",
@@ -22,7 +23,7 @@ def process_location(df: pd.DataFrame, location: str, target_year: int, prev_yea
             df_location = df[df.location == location]
 
             if df_location.empty:
-                logger.warning("No data for %s", location)
+                logger.warning("No data for {}", location)
                 continue
 
             df_rolling = df_location.rolling(ROLLING_WINDOW, min_periods=MIN_PERIODS).mean(numeric_only=True)[column]
@@ -33,7 +34,7 @@ def process_location(df: pd.DataFrame, location: str, target_year: int, prev_yea
             y_prev = df_rolling[df_rolling.index.year == prev_year]
 
             if y_target.empty:
-                logger.warning("No data for %s in %s", location, target_year)
+                logger.warning("No data for {} in {}", location, target_year)
                 continue
 
             # X-axis is based on target year dates formatted as dd/mm
@@ -80,19 +81,17 @@ def process_location(df: pd.DataFrame, location: str, target_year: int, prev_yea
             filename = f"images/{title_loc}_{column}.png"
             plt.savefig(filename, dpi=DPI)
             plt.close()
-            logger.success("Saved %s", filename)
+            logger.success("Saved {}", filename)
 
-        except Exception:
-            logger.exception("Error processing %s - %s", location, column)
+        except (ValueError, KeyError, RuntimeError, OSError):
+            logger.exception("Error processing {} - {}", location, column)
 
 
 def main() -> None:
     try:
         df = pd.read_csv("temp_all.csv", parse_dates=["date"])
     except FileNotFoundError:
-        logger.error(  # noqa: TRY400
-            "temp_all.csv not found. Please run make_all.py first."
-        )
+        logger.error("temp_all.csv not found. Please run make_all.py first.")
         sys.exit(1)
 
     # Set index to date but keep the column for safety if needed,
@@ -114,8 +113,8 @@ def main() -> None:
     target_year = int(max_year)
     prev_year = target_year - 1
 
-    logger.info("Latest year in dataset: %s", max_year)
-    logger.info("Comparing %s vs %s", prev_year, target_year)
+    logger.info("Latest year in dataset: {}", max_year)
+    logger.info("Comparing {} vs {}", prev_year, target_year)
 
     locations = [
         "NAMBOUR DAFF - HILLSIDE",
@@ -130,6 +129,7 @@ def main() -> None:
     ]
 
     for location in locations:
+        Path("images").mkdir(parents=True, exist_ok=True)
         process_location(df, location, target_year, prev_year)
 
 
