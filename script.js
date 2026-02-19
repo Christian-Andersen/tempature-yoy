@@ -1,29 +1,15 @@
-interface WeatherData {
-    metadata: {
-        target_year: number;
-        prev_year: number;
-        locations: string[];
-    };
-    locations: {
-        [key: string]: {
-            max_temp: { [year: string]: number[] };
-            max_humidity: { [year: string]: number[] };
-            labels: string[];
-        };
-    };
-}
-
-let chart: any = null;
-let weatherData: WeatherData | null = null;
+let chart = null;
+let weatherData = null;
 
 async function init() {
+    // Relative path for GitHub Pages compatibility
     const response = await fetch('public/data.json');
     weatherData = await response.json();
 
     if (!weatherData) return;
 
-    const locationSelect = document.getElementById('locationSelect') as HTMLSelectElement;
-    const metricSelect = document.getElementById('metricSelect') as HTMLSelectElement;
+    const locationSelect = document.getElementById('locationSelect');
+    const metricSelect = document.getElementById('metricSelect');
 
     locationSelect.innerHTML = '';
     weatherData.metadata.locations.forEach(loc => {
@@ -42,11 +28,11 @@ async function init() {
 function updateChart() {
     if (!weatherData) return;
 
-    const location = (document.getElementById('locationSelect') as HTMLSelectElement).value;
-    const metric = (document.getElementById('metricSelect') as HTMLSelectElement).value;
+    const location = document.getElementById('locationSelect').value;
+    const metric = document.getElementById('metricSelect').value;
     const data = weatherData.locations[location];
 
-    const ctx = (document.getElementById('weatherChart') as HTMLCanvasElement).getContext('2d');
+    const ctx = document.getElementById('weatherChart').getContext('2d');
     
     if (chart) {
         chart.destroy();
@@ -64,7 +50,7 @@ function updateChart() {
             datasets: [
                 {
                     label: prevYear,
-                    data: data[metric as 'max_temp' | 'max_humidity'][prevYear],
+                    data: data[metric][prevYear],
                     borderColor: 'rgba(54, 162, 235, 1)',
                     backgroundColor: 'rgba(54, 162, 235, 0.2)',
                     borderWidth: 2,
@@ -73,7 +59,7 @@ function updateChart() {
                 },
                 {
                     label: targetYear,
-                    data: data[metric as 'max_temp' | 'max_humidity'][targetYear],
+                    data: data[metric][targetYear],
                     borderColor: 'rgba(255, 99, 132, 1)',
                     backgroundColor: 'rgba(255, 99, 132, 0.2)',
                     borderWidth: 2,
@@ -98,9 +84,8 @@ function updateChart() {
                         autoSkip: true,
                         maxRotation: 45,
                         minRotation: 45,
-                        callback: function(val: any, index: number) {
+                        callback: function(val, index) {
                             const label = labels[index];
-                            // Show every 01 and 15, plus the very last data point
                             if (label.startsWith('01') || label.startsWith('15') || index === labels.length - 1) {
                                 return label;
                             }
