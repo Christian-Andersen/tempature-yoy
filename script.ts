@@ -17,7 +17,7 @@ let chart: any = null;
 let weatherData: WeatherData | null = null;
 
 async function init() {
-    const response = await fetch('data.json');
+    const response = await fetch('public/data.json');
     weatherData = await response.json();
 
     if (!weatherData) return;

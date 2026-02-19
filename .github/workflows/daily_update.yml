@@ -1,0 +1,44 @@
+name: Daily Data Update
+
+on:
+  schedule:
+    - cron: '0 0 * * *'  # Runs at 00:00 UTC every day
+  workflow_dispatch:      # Allows manual trigger
+
+jobs:
+  update-data:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      - name: Set up Python
+        run: uv python install
+
+      - name: Run Data Processing
+        run: |
+          uv run make_all.py
+          uv run analysis.py
+
+      - name: Commit and Push Changes
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          
+          # Stage only the files needed for the live site
+          git add public/data.json
+          
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "chore: automated daily data update [skip ci]"
+            git push
+          fi

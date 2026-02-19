@@ -10,6 +10,26 @@ MIN_PERIODS: Final = 1
 ROLLING_WINDOW: Final = 14
 
 
+LOCATIONS: Final = [
+    "NAMBOUR DAFF - HILLSIDE",
+    "SYDNEY (OBSERVATORY HILL)",
+    "BRISBANE",
+    "CANBERRA AIRPORT",
+    "DARWIN AIRPORT",
+    "ADELAIDE (WEST TERRACE _ NGAYIRDAPIRA)",
+    "HOBART AIRPORT",
+    "MELBOURNE (OLYMPIC PARK)",
+    "PERTH METRO",
+    "ALICE SPRINGS AIRPORT",
+    "CAIRNS AIRPORT",
+    "TOWNSVILLE AERO",
+    "BROOME AIRPORT",
+    "GOLD COAST SEAWAY",
+    "NEWCASTLE NOBBYS SIGNAL STATION AWS",
+    "PORT HEDLAND AIRPORT",
+]
+
+
 def process_location(df: pd.DataFrame, location: str, target_year: int, prev_year: int) -> dict:
     logger.info("Processing {}...", location)
     location_data = {
@@ -17,28 +37,25 @@ def process_location(df: pd.DataFrame, location: str, target_year: int, prev_yea
         "max_humidity": {}
     }
     
+    # Filter for the location once
+    df_location = df[df.location == location]
+    if df_location.empty:
+        logger.warning("No data for {}", location)
+        return location_data
+
     for column in ["max_temp", "max_humidity"]:
         try:
-            df_location = df[df.location == location]
+            # Perform rolling mean on the specific column
+            series_rolling = df_location[column].rolling(ROLLING_WINDOW, min_periods=MIN_PERIODS).mean(numeric_only=True)
 
-            if df_location.empty:
-                logger.warning("No data for {}", location)
-                continue
-
-            df_rolling = df_location.rolling(ROLLING_WINDOW, min_periods=MIN_PERIODS).mean(numeric_only=True)[column]
-
-            y_target = df_rolling[df_rolling.index.year == target_year]
-            y_prev = df_rolling[df_rolling.index.year == prev_year]
+            y_target = series_rolling[series_rolling.index.year == target_year]
+            y_prev = series_rolling[series_rolling.index.year == prev_year]
 
             if y_target.empty:
                 logger.warning("No data for {} in {}", location, target_year)
                 continue
 
             # We'll use the target year's dates (day/month) as labels
-            # To ensure we match by day of year, we'll just take the values
-            # and handle alignment in the frontend if needed, but for now
-            # let's just provide the raw rolling values for both years.
-            
             location_data[column][str(target_year)] = y_target.tolist()
             location_data[column][str(prev_year)] = y_prev.tolist()
             location_data["labels"] = y_target.index.strftime("%d-%b").tolist()
@@ -73,25 +90,6 @@ def main() -> None:
     logger.info("Latest year in dataset: {}", max_year)
     logger.info("Comparing {} vs {}", prev_year, target_year)
 
-    locations = [
-        "NAMBOUR DAFF - HILLSIDE",
-        "SYDNEY (OBSERVATORY HILL)",
-        "BRISBANE",
-        "CANBERRA AIRPORT",
-        "DARWIN AIRPORT",
-        "ADELAIDE (WEST TERRACE _ NGAYIRDAPIRA)",
-        "HOBART AIRPORT",
-        "MELBOURNE (OLYMPIC PARK)",
-        "PERTH METRO",
-        "ALICE SPRINGS AIRPORT",
-        "CAIRNS AIRPORT",
-        "TOWNSVILLE AERO",
-        "BROOME AIRPORT",
-        "GOLD COAST SEAWAY",
-        "NEWCASTLE NOBBYS SIGNAL STATION AWS",
-        "PORT HEDLAND AIRPORT",
-    ]
-
     all_data = {
         "metadata": {
             "target_year": target_year,
@@ -101,7 +99,7 @@ def main() -> None:
         "locations": {}
     }
 
-    for location in locations:
+    for location in LOCATIONS:
         short_name = location.split(maxsplit=1)[0]
         data = process_location(df, location, target_year, prev_year)
         if data["max_temp"] or data["max_humidity"]:

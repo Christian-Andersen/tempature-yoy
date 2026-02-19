@@ -1,41 +1,27 @@
-# A look at if it is really hotter this year.
-Temperature and Humidity data is taken from Bureau of Meteorology
+# Temperature and Humidity Comparison
+Temperature and Humidity data is taken from Bureau of Meteorology.
 
-## Links
-| [Nambour](#nambour) | [Brisbane](#brisbane) | [Sydney](#sydney) | [Canberra](#canberra) | [Melbourne](#melbourne) | [Hobart](#hobart) | [Adelaide](#adelaide) | [Perth](#perth) | [Darwin](#darwin) |
+## 📊 Live Dashboard
+The data is visualized through an interactive dashboard hosted on GitHub Pages.
 
-## Nambour
-<img src="images/NAMBOUR_max_temp.png"/>
-<img src="images/NAMBOUR_max_humidity.png"/>
+**[View Live Dashboard](https://Christian-Andersen.github.io/tempature-yoy/)**
 
-## Brisbane
-<img src="images/BRISBANE_max_temp.png"/>
-<img src="images/BRISBANE_max_humidity.png"/>
+The dashboard provides a rolling 14-day average comparison between the current year and the previous year for various locations across Australia.
 
-## Sydney
-<img src="images/SYDNEY_max_temp.png"/>
-<img src="images/SYDNEY_max_humidity.png"/>
-
-## Canberra
-<img src="images/CANBERRA_max_temp.png"/>
-<img src="images/CANBERRA_max_humidity.png"/>
-
-## Melbourne
-<img src="images/MELBOURNE_max_temp.png"/>
-<img src="images/MELBOURNE_max_humidity.png"/>
-
-## Hobart
-<img src="images/HOBART_max_temp.png"/>
-<img src="images/HOBART_max_humidity.png"/>
-
-## Adelaide
-<img src="images/ADELAIDE_max_temp.png"/>
-<img src="images/ADELAIDE_max_humidity.png"/>
-
-## Perth
-<img src="images/PERTH_max_temp.png"/>
-<img src="images/PERTH_max_humidity.png"/>
-
-## Darwin
-<img src="images/DARWIN_max_temp.png"/>
-<img src="images/DARWIN_max_humidity.png"/>
+## Locations
+* Nambour
+* Brisbane
+* Sydney
+* Canberra
+* Melbourne
+* Hobart
+* Adelaide
+* Perth
+* Darwin
+* Alice Springs
+* Cairns
+* Townsville
+* Broome
+* Gold Coast
+* Newcastle
+* Port Hedland
